@@ -1,7 +1,28 @@
 import { UserLockModel } from '@/models/authlogin';
 import { UserDataModel } from '@/models/userdata';
 import { hash } from 'bcryptjs';
-import { sign } from 'jsonwebtoken';
+import { JwtPayload, sign } from 'jsonwebtoken';
+import { isValidObjectId } from 'mongoose';
+
+declare module "jsonwebtoken" {
+    interface JwtPayload {
+        user:{
+            id:string,
+            name:string
+        },
+        auth:{
+            date:Date
+        }
+    }
+};
+
+export const EasyTryCatch = async (callback: Function) => {
+	let res = null;
+	try {
+		res = await callback();
+	} catch {}
+	return res;
+};
 
 export const getDateNow = () => new Date(Date.now()).toISOString();
 
@@ -21,7 +42,30 @@ export const genToken = (_id: string, name: String): string => {
 	return tk;
 };
 
-export const createNewUser = async (name: string, pasw: string, email:string) => {
+export const checkPayload = (payload: string): JwtPayload | false => {
+	if (!payload) false;
+	const tempJSON = JSON.parse(payload);
+	if (!tempJSON.user || !tempJSON.auth) return false;
+	if (!isValidObjectId(tempJSON.user.id)) return false;
+
+	const data: JwtPayload = {
+		user:{
+			id:tempJSON.user.id,
+			name: tempJSON.user.name
+		},
+		auth:{
+			date: tempJSON.date
+		}
+	};
+
+	return data;
+};
+
+export const createNewUser = async (
+	name: string,
+	pasw: string,
+	email: string
+) => {
 	const hashPasw = await hash(pasw, 12);
 	const userLock = await UserLockModel.create({
 		name: name,
