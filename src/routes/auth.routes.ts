@@ -27,7 +27,7 @@ router.post('/login', async (req, res) => {
 	res.json({
 		status: true,
 		msg: 'authenticated',
-		cookie: `portals:stoken=${token}`,
+		cookie: `portals:stoken=${token};path=/`,
 		redirect: '/home',
 	});
 });

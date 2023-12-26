@@ -7,10 +7,7 @@ import { enable } from 'colors';
 import { connectDB } from '@/database';
 enable();
 
-connectDB().catch((re) => {
-	console.log('DB ERROR'.bgRed);
-	console.log(re.red);
-});
+connectDB();
 
 const app = express();
 
