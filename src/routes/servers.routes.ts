@@ -214,24 +214,28 @@ router.post('/servers/join', async (req, res) => {
 	});
 });
 
-/*
-router.get('/chan/add', async (req, res) => {
-	const origin = req.headers.referer;
-	if (!req.query.id || !req.query.name || !req.query.type) {
-		res.redirect(`${origin}servers`);
+router.post('/channels/add', async (req, res) => {
+	console.log(req.body);
+
+	if (!req.body.user || !req.body.name || !req.body.is || !req.body.server) {
+		res.json({ status: false, msg: 'invalid fields' });
 		return;
 	}
-	res.redirect(`${origin}servers`);
 
-	const server = await ServerModel.findById(req.query.id);
-	if (!server || server === null) {
-		res.redirect(`${origin}servers`);
+	const server = await ServerModel.findById(req.body.server);
+	if (!server || server === null || server.super === null) {
+		res.json({ status: false, msg: 'registry error' });
 		return;
+	}
+	//@ts-ignore
+	const isSuper = server.super.toString() === req.body.user;
+	if (!isSuper) {
+		res.json({ status: false, msg: 'permision denied' });
 	}
 
 	const channel = await ChannelModel.create({
-		name: req.query.name,
-		is: req.query.type,
+		name: req.body.name,
+		is: req.body.is,
 		history: null,
 		from: server,
 	});
@@ -243,7 +247,11 @@ router.get('/chan/add', async (req, res) => {
 	server.channels?.push(channel);
 	await server.save();
 
-	res.redirect(`${origin}servers/${req.query.id}`);
+	res.json({
+		status: true,
+		msg: 'channel created',
+		redirect: `/servers/${req.body.server}`,
+	});
 });
-*/
+
 export default router;
