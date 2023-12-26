@@ -136,41 +136,32 @@ router.get('/channels/:svId/:chanId', async (req, res) => {
 	res.json({ status: true, channel: channel, server: server });
 });
 
-router.get('/servers/create', async (req, res) => {
-	const origin = req.headers.referer;
+router.post('/servers/create', async (req, res) => {
+	console.log(req.body);
 
-	if (
-		!origin ||
-		!req.query.desc ||
-		!req.query.user ||
-		!req.query.name ||
-		!req.query.public
-	) {
-		res.json({ status: false });
+	if (!req.body.desc || !req.body.user || !req.body.name) {
+		res.json({ status: false, msg: 'invalid fields' });
 		return;
 	}
 
-	const user = await UserDataModel.findById(req.query.user);
-	const userLock = await UserLockModel.findById(req.query.user);
+	const user = await UserDataModel.findById(req.body.user);
+	const userLock = await UserLockModel.findById(req.body.user);
 
-	if (!user || !userLock || (user.created !== 0 && !userLock.isSuper)) {
-		res.json({ status: false });
+	if (!user || !userLock) {
+		res.json({ status: false, msg: 'registry error' });
 		return;
 	}
 
 	const server = await ServerModel.create({
-		name: req.query.name.toString(),
-		isPublic: Boolean(req.query.public),
+		name: req.body.name.toString(),
+		isPublic: Boolean(req.body.isPublic),
 		key: null,
 		channels: [],
-		description: req.query.desc.toString(),
+		description: req.body.desc.toString(),
+		super: user,
 	});
 
 	await server.save();
-	if (!user.created || user.created === null) {
-		user.created = 0;
-	}
-	user.created = user.created.valueOf() + 1;
 	user.servers?.push(server);
 	await user.save();
 
@@ -181,12 +172,11 @@ router.get('/servers/create', async (req, res) => {
 		history: null,
 	});
 
-	server.super = user;
 	await defaultChan.save();
 	server.channels?.push(defaultChan);
 	await server.save();
 
-	res.redirect(`${origin}servers`);
+	res.json({ status: true, msg: 'server created', redirect: '/servers' });
 });
 
 router.post('/servers/join', async (req, res) => {
