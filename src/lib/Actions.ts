@@ -4,17 +4,17 @@ import { hash } from 'bcryptjs';
 import { JwtPayload, sign } from 'jsonwebtoken';
 import { isValidObjectId } from 'mongoose';
 
-declare module "jsonwebtoken" {
-    interface JwtPayload {
-        user:{
-            id:string,
-            name:string
-        },
-        auth:{
-            date:Date
-        }
-    }
-};
+declare module 'jsonwebtoken' {
+	interface JwtPayload {
+		user: {
+			id: string;
+			name: string;
+		};
+		auth: {
+			date: Date;
+		};
+	}
+}
 
 export const EasyTryCatch = async (callback: Function) => {
 	let res = null;
@@ -49,13 +49,13 @@ export const checkPayload = (payload: string): JwtPayload | false => {
 	if (!isValidObjectId(tempJSON.user.id)) return false;
 
 	const data: JwtPayload = {
-		user:{
-			id:tempJSON.user.id,
-			name: tempJSON.user.name
+		user: {
+			id: tempJSON.user.id,
+			name: tempJSON.user.name,
 		},
-		auth:{
-			date: tempJSON.date
-		}
+		auth: {
+			date: tempJSON.date,
+		},
 	};
 
 	return data;
@@ -89,4 +89,40 @@ export const createNewUser = async (
 	}
 	const token = genToken(userLock._id.toString(), userLock.name);
 	return token;
+};
+
+export const GroupBy = (
+	groups: Array<string>,
+	array: Array<any>,
+	property: string | false
+) => {
+	const tmp = new Map();
+	tmp.set('error', []);
+	groups.forEach((group) => {
+		//@ts-ignore
+		tmp.set(group, []);
+	});
+	array.forEach((el) => {
+		let find = el;
+		if (property) {
+			find = el[property];
+		}
+		//@ts-ignore
+		if (!tmp.has(find)) {
+			//@ts-ignore
+			tmp.set('error', [...tmp.get('error'), el]);
+		} else {
+			//@ts-ignore
+			tmp.set(find, [...tmp.get(find), el]);
+		}
+	});
+	return tmp;
+};
+
+export const reduceArrOfArr = (arr: Array<Array<any>> | Map<any,any>) => {
+	let temp: Array<any> = [];
+	arr.forEach((el) => {
+		temp.push(...el);
+	});
+	return temp;
 };

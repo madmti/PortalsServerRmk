@@ -1,4 +1,10 @@
-import { checkPayload, EasyTryCatch } from '@/lib/Actions';
+import {
+	checkPayload,
+	EasyTryCatch,
+	GroupBy,
+	reduceArrOfArr,
+} from '@/lib/Actions';
+import { Channel } from '@/lib/Types';
 import { UserLockModel } from '@/models/authlogin';
 import { ChannelModel, ServerModel } from '@/models/servers';
 import { UserDataModel } from '@/models/userdata';
@@ -83,7 +89,16 @@ router.get('/channels/:svId', async (req, res) => {
 		return;
 	}
 
-	res.json({ status: true, channels: server.channels, server: server });
+	res.json({
+		status: true,
+		channels:
+			server.channels === null
+				? null
+				: reduceArrOfArr(
+						GroupBy(['text', 'voice', 'video'], server.channels, 'is')
+				  ),
+		server: server,
+	});
 });
 
 router.get('/channels/:svId/:chanId', async (req, res) => {
