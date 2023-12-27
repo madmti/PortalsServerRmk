@@ -5,7 +5,8 @@ export type UserLock = {
     name: String,
     email: String,
     password: String,
-    isSuper: boolean
+    isSuper: boolean,
+    ref: ObjectId | UserData
 };
 
 export type Message = {

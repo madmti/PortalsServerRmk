@@ -3,13 +3,11 @@ import { UserDataModel } from '@/models/userdata';
 import { hash } from 'bcryptjs';
 import { JwtPayload, sign } from 'jsonwebtoken';
 import { isValidObjectId } from 'mongoose';
+import { UserData } from './Types';
 
 declare module 'jsonwebtoken' {
 	interface JwtPayload {
-		user: {
-			id: string;
-			name: string;
-		};
+		user: UserData;
 		auth: {
 			date: Date;
 		};
@@ -26,13 +24,10 @@ export const EasyTryCatch = async (callback: Function) => {
 
 export const getDateNow = () => new Date(Date.now()).toISOString();
 
-export const genToken = (_id: string, name: String): string => {
+export const genToken = (reference: UserData): string => {
 	const tk = sign(
 		{
-			user: {
-				id: _id,
-				name: name,
-			},
+			user: reference,
 			auth: {
 				date: getDateNow(),
 			},
@@ -46,13 +41,10 @@ export const checkPayload = (payload: string): JwtPayload | false => {
 	if (!payload) false;
 	const tempJSON = JSON.parse(payload);
 	if (!tempJSON.user || !tempJSON.auth) return false;
-	if (!isValidObjectId(tempJSON.user.id)) return false;
+	if (!isValidObjectId(tempJSON.user._id)) return false;
 
 	const data: JwtPayload = {
-		user: {
-			id: tempJSON.user.id,
-			name: tempJSON.user.name,
-		},
+		user: tempJSON.user,
 		auth: {
 			date: tempJSON.date,
 		},
@@ -81,13 +73,14 @@ export const createNewUser = async (
 		servers: [],
 		created: 0,
 	});
+	userLock.ref = userData;
 	try {
-		await userLock.save();
 		await userData.save();
+		await userLock.save();
 	} catch {
 		return false;
 	}
-	const token = genToken(userLock._id.toString(), userLock.name);
+	const token = genToken(userData);
 	return token;
 };
 
@@ -119,7 +112,7 @@ export const GroupBy = (
 	return tmp;
 };
 
-export const reduceArrOfArr = (arr: Array<Array<any>> | Map<any,any>) => {
+export const reduceArrOfArr = (arr: Array<Array<any>> | Map<any, any>) => {
 	let temp: Array<any> = [];
 	arr.forEach((el) => {
 		temp.push(...el);

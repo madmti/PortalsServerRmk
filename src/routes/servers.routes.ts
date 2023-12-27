@@ -25,7 +25,7 @@ router.get('/servers', async (req, res) => {
 		return;
 	}
 
-	const userData = await UserDataModel.findById(payload.user.id).populate(
+	const userData = await UserDataModel.findById(payload.user._id).populate(
 		'servers'
 	);
 
@@ -71,7 +71,7 @@ router.get('/channels/:svId', async (req, res) => {
 		return;
 	}
 
-	const userData = await UserDataModel.findById(payload.user.id).populate(
+	const userData = await UserDataModel.findById(payload.user._id).populate(
 		'servers'
 	);
 	const server = await ServerModel.findById(req.params.svId).populate(
@@ -118,7 +118,7 @@ router.get('/channels/:svId/:chanId', async (req, res) => {
 		return;
 	}
 
-	const userData = await UserDataModel.findById(payload.user.id).populate(
+	const userData = await UserDataModel.findById(payload.user._id).populate(
 		'servers'
 	);
 	const server = await ServerModel.findById(req.params.svId).populate(
@@ -152,8 +152,6 @@ router.get('/channels/:svId/:chanId', async (req, res) => {
 });
 
 router.post('/servers/create', async (req, res) => {
-	console.log(req.body);
-
 	if (!req.body.desc || !req.body.user || !req.body.name) {
 		res.json({ status: false, msg: 'invalid fields' });
 		return;
@@ -230,8 +228,6 @@ router.post('/servers/join', async (req, res) => {
 });
 
 router.post('/channels/add', async (req, res) => {
-	console.log(req.body);
-
 	if (!req.body.user || !req.body.name || !req.body.is || !req.body.server) {
 		res.json({ status: false, msg: 'invalid fields' });
 		return;

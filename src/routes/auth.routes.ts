@@ -6,7 +6,7 @@ import { createNewUser, genToken } from '@/lib/Actions';
 const router = Router();
 
 router.post('/login', async (req, res) => {
-	const user = await UserLockModel.findOne({ name: req.body.user });
+	const user = await UserLockModel.findOne({ name: req.body.user }).populate('ref');
 
 	if (user === null || !user || !req.body.pasw || !req.body.user) {
 		res.json({ status: false, msg: 'username not registered' });
@@ -22,8 +22,8 @@ router.post('/login', async (req, res) => {
 		res.json({ status: false, msg: 'credentials did not match' });
         return;
 	}
-
-	const token = genToken(user._id.toString(), user.name);
+	//@ts-ignore
+	const token = genToken(user.ref);
 	res.json({
 		status: true,
 		msg: 'authenticated',
