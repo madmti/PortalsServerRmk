@@ -1,4 +1,5 @@
 import { connect } from 'mongoose';
+import { log } from './lib/Actions';
 import { URI, ROOT_PASW, ROOT_USER } from 'public.env';
 
 export const connectDB = async () => {
@@ -9,13 +10,13 @@ export const connectDB = async () => {
 				password: ROOT_PASW,
 			},
 		});
-		console.log('DB: CONNECTED'.bgMagenta);
+		log(['DB:'.bgGreen, 'CONNECTED'.green], 0);
 	} catch {
-		console.log('DB ERROR: NO CREDENTIAL WAS PROVIDED'.bgRed);
-		console.log('DB: Trying to connect without credentials'.red);
+		log(['DB ERROR:'.bgRed, 'NO CREDENTIAL WAS PROVIDED'.red], 0);
+		log(['DB:'.bgYellow, 'Trying to connect without credentials'.yellow], 0);
 		try {
 			await connect(URI);
-			console.log('DB: CONNECTED'.bgMagenta);
+			log(['DB:'.bgGreen, 'CONNECTED'.green], 0);
 		} catch {
 			console.log('DB: ERROR CONNECTING TO DATABASE'.bgRed);
 		}

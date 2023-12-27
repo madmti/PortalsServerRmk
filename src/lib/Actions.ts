@@ -126,3 +126,12 @@ export const reduceArrOfArr = (arr: Array<Array<any>> | Map<any,any>) => {
 	});
 	return temp;
 };
+
+export const log = (msg: string | Array<string>, indent: number) => {
+	const spacing = '   '.repeat(indent);
+	if (typeof msg === 'string') {
+		console.log(spacing + msg);
+		return;
+	}
+	console.log(spacing + msg.join(' '));
+};
