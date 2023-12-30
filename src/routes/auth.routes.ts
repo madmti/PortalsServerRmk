@@ -108,7 +108,13 @@ router.post('/renew', async (req, res) => {
 		return;
 	}
 
-	const user = await UserLockModel.findById(payload.user._id).populate('ref');
+	const user = await UserLockModel.findById(payload.user._id).populate({
+		path: 'ref',
+		populate: {
+			path: 'friends',
+			model: 'UserData',
+		},
+	});
 	if (!user || user === null) {
 		res.json({ status: false, msg: 'user does not exist' });
 		return;
