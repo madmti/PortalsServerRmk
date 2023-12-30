@@ -38,19 +38,23 @@ export const genToken = (reference: UserData): string => {
 };
 
 export const checkPayload = (payload: string): JwtPayload | false => {
-	if (!payload) false;
-	const tempJSON = JSON.parse(payload);
-	if (!tempJSON.user || !tempJSON.auth) return false;
-	if (!isValidObjectId(tempJSON.user._id)) return false;
+	try {
+		if (!payload) false;
+		const tempJSON = JSON.parse(payload);
+		if (!tempJSON.user || !tempJSON.auth) return false;
+		if (!isValidObjectId(tempJSON.user._id)) return false;
 
-	const data: JwtPayload = {
-		user: tempJSON.user,
-		auth: {
-			date: tempJSON.date,
-		},
-	};
+		const data: JwtPayload = {
+			user: tempJSON.user,
+			auth: {
+				date: tempJSON.date,
+			},
+		};
 
-	return data;
+		return data;
+	} catch {
+		return false;
+	}
 };
 
 export const createNewUser = async (
